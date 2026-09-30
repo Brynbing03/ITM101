@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Scheduler</title>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header>
+        <div>
+            <p class="app-name">MY SCHEDULER</p>
+            <h1 id="page-title">My Week</h1>
+        </div>
+
+        <div class="view-buttons">
+            <button id="week-view-button" class="view-button active">
+                Week
+            </button>
+
+            <button id="day-view-button" class="view-button">
+                Day
+            </button>
+        </div>
+    </header>
+
+
+    <main>
+
+        <!-- DATE NAVIGATION -->
+
+        <section class="date-navigation">
+
+            <button id="previous-button" class="arrow-button">
+                &lt;
+            </button>
+
+            <h2 id="current-date-title"></h2>
+
+            <button id="next-button" class="arrow-button">
+                &gt;
+            </button>
+
+        </section>
+
+
+        <!-- WEEK VIEW -->
+
+        <section id="week-view">
+
+            <div id="week-days" class="week-days">
+                <!-- JavaScript creates the week here -->
+            </div>
+
+        </section>
+
+
+        <!-- DAY VIEW -->
+
+        <section id="day-view" class="hidden">
+
+            <div id="day-schedule" class="day-schedule">
+                <!-- JavaScript creates the day's events here -->
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ADD EVENT BUTTON -->
+
+    <button id="add-event-button" class="add-button">
+        +
+    </button>
+
+
+    <!-- ADD EVENT POPUP -->
+
+    <div id="event-modal" class="modal">
+
+        <div class="modal-content">
+
+            <button id="close-modal" class="close-button">
+                &times;
+            </button>
+
+            <h2>Add Event</h2>
+
+            <form id="event-form">
+
+                <label for="event-title">Event</label>
+
+                <input
+                    type="text"
+                    id="event-title"
+                    placeholder="Study for Biology"
+                    required
+                >
+
+
+                <label for="event-date">Date</label>
+
+                <input
+                    type="date"
+                    id="event-date"
+                    required
+                >
+
+
+                <label for="event-time">Start Time</label>
+
+                <input
+                    type="time"
+                    id="event-time"
+                    required
+                >
+
+
+                <label for="event-end-time">End Time</label>
+
+                <input
+                    type="time"
+                    id="event-end-time"
+                    required
+                >
+
+
+                <label for="event-type">Type</label>
+
+                <select id="event-type">
+
+                    <option value="school">School</option>
+
+                    <option value="study">Study</option>
+
+                    <option value="work">Work</option>
+
+                    <option value="exercise">Exercise</option>
+
+                    <option value="personal">Personal</option>
+
+                </select>
+
+
+                <button type="submit" class="save-button">
+                    Add Event
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script src="scheduler.js"></script>
+
+</body>
+
+</html>

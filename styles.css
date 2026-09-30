@@ -1,0 +1,676 @@
+/* -------------------------
+   COLOR PALETTE
+
+   Cotton Rose:   #EEB4B3
+   Petal Pink:    #C179B9
+   Purple:        #A42CD6
+   Indigo Velvet: #502274
+   Shadow Grey:   #2F242C
+------------------------- */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #2F242C;
+    color: white;
+    min-height: 100vh;
+}
+
+
+/* -------------------------
+   HEADER
+------------------------- */
+
+header {
+    max-width: 1200px;
+    margin: auto;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 35px 30px 15px;
+}
+
+.app-name {
+    color: #C179B9;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2px;
+
+    margin: 0 0 5px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.4rem;
+    color: #EEB4B3;
+}
+
+
+/* -------------------------
+   WEEK / DAY BUTTONS
+------------------------- */
+
+.view-buttons {
+    display: flex;
+
+    background-color: #502274;
+
+    padding: 5px;
+
+    border-radius: 10px;
+}
+
+.view-button {
+    border: none;
+    background: transparent;
+    color: #EEB4B3;
+
+    padding: 9px 16px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+}
+
+.view-button:hover {
+    background-color: #6c3292;
+}
+
+.view-button.active {
+    background-color: #EEB4B3;
+    color: #2F242C;
+}
+
+
+/* -------------------------
+   MAIN
+------------------------- */
+
+main {
+    max-width: 1200px;
+    margin: auto;
+    padding: 0 30px 100px;
+}
+
+
+/* -------------------------
+   DATE NAVIGATION
+------------------------- */
+
+.date-navigation {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    margin: 20px 0 30px;
+}
+
+.date-navigation h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #EEB4B3;
+}
+
+.arrow-button {
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    border-radius: 50%;
+
+    background-color: #502274;
+    color: #EEB4B3;
+
+    font-size: 22px;
+
+    cursor: pointer;
+}
+
+.arrow-button:hover {
+    background-color: #A42CD6;
+    color: white;
+}
+
+
+/* -------------------------
+   WEEK
+------------------------- */
+
+.week-days {
+    display: grid;
+
+    grid-template-columns: repeat(7, 1fr);
+
+    gap: 12px;
+}
+
+
+/* -------------------------
+   EACH DAY
+------------------------- */
+
+.week-day {
+    background-color: #3b2d38;
+
+    border-radius: 18px;
+
+    min-height: 550px;
+
+    padding: 15px 10px;
+
+    cursor: pointer;
+
+    border: 1px solid #502274;
+
+    transition:
+        transform 0.2s,
+        background-color 0.2s,
+        border-color 0.2s;
+}
+
+.week-day:hover {
+    background-color: #453341;
+
+    border-color: #C179B9;
+
+    transform: translateY(-3px);
+}
+
+
+/* -------------------------
+   DAY HEADER
+------------------------- */
+
+.week-day-header {
+    text-align: center;
+
+    padding-bottom: 15px;
+
+    border-bottom: 1px solid #502274;
+}
+
+.week-day-name {
+    color: #C179B9;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    text-transform: uppercase;
+}
+
+.week-day-number {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    margin: 8px auto 0;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    color: white;
+}
+
+
+/* TODAY */
+
+.today .week-day-number {
+    background-color: #EEB4B3;
+    color: #2F242C;
+}
+
+
+/* -------------------------
+   WEEK EVENTS
+------------------------- */
+
+.week-event {
+    background-color: #EEB4B3;
+
+    color: #2F242C;
+
+    margin-top: 12px;
+
+    padding: 12px 8px;
+
+    border-radius: 15px;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    overflow: hidden;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.week-event-icon {
+    font-size: 22px;
+
+    display: block;
+
+    margin-bottom: 5px;
+}
+
+.week-event-time {
+    color: #502274;
+
+    font-size: 10px;
+
+    margin-top: 4px;
+
+    font-weight: bold;
+}
+
+
+/* -------------------------
+   DAY VIEW
+------------------------- */
+
+.day-schedule {
+    background-color: #3b2d38;
+
+    border: 1px solid #502274;
+
+    border-radius: 25px;
+
+    padding: 25px;
+
+    min-height: 600px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+
+/* -------------------------
+   INDIVIDUAL EVENT
+------------------------- */
+
+.day-event {
+    display: grid;
+
+    grid-template-columns: 100px 85px 1fr 50px;
+
+    align-items: center;
+
+    gap: 20px;
+
+    min-height: 120px;
+
+    border-bottom: 1px solid #502274;
+
+    padding: 15px 0;
+}
+
+
+/* TIME */
+
+.day-event-time {
+    color: #C179B9;
+
+    font-size: 16px;
+}
+
+
+/* EVENT ICON */
+
+.day-event-icon {
+    width: 75px;
+    height: 90px;
+
+    border-radius: 30px;
+
+    background-color: #EEB4B3;
+
+    color: #502274;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    font-size: 30px;
+}
+
+
+/* EVENT INFO */
+
+.day-event-info h3 {
+    margin: 5px 0;
+
+    font-size: 20px;
+
+    color: white;
+}
+
+.day-event-info p {
+    color: #C179B9;
+
+    margin: 0;
+}
+
+
+/* -------------------------
+   COMPLETED EVENT
+------------------------- */
+
+.day-event.completed h3 {
+    text-decoration: line-through;
+
+    color: #9b8495;
+}
+
+.day-event.completed {
+    opacity: 0.6;
+}
+
+
+/* -------------------------
+   COMPLETE BUTTON
+------------------------- */
+
+.complete-button {
+    width: 40px;
+    height: 40px;
+
+    border: none;
+    border-radius: 50%;
+
+    background-color: #EEB4B3;
+
+    color: #502274;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.complete-button:hover {
+    background-color: #C179B9;
+    color: white;
+}
+
+
+/* -------------------------
+   EMPTY DAY
+------------------------- */
+
+.empty-day {
+    text-align: center;
+
+    color: #C179B9;
+
+    padding: 100px 20px;
+}
+
+.empty-day h3 {
+    color: #EEB4B3;
+}
+
+
+/* -------------------------
+   ADD BUTTON
+------------------------- */
+
+.add-button {
+    position: fixed;
+
+    right: 35px;
+    bottom: 35px;
+
+    width: 70px;
+    height: 70px;
+
+    border-radius: 50%;
+
+    border: none;
+
+    background-color: #EEB4B3;
+
+    color: #502274;
+
+    font-size: 40px;
+
+    cursor: pointer;
+
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+
+    transition:
+        transform 0.2s,
+        background-color 0.2s;
+}
+
+.add-button:hover {
+    background-color: #C179B9;
+    color: white;
+
+    transform: scale(1.05);
+}
+
+
+/* -------------------------
+   MODAL BACKGROUND
+------------------------- */
+
+.modal {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background-color: rgba(47, 36, 44, 0.8);
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+
+    z-index: 10;
+}
+
+
+/* -------------------------
+   MODAL BOX
+------------------------- */
+
+.modal-content {
+    background-color: #3b2d38;
+
+    width: 100%;
+    max-width: 450px;
+
+    padding: 30px;
+
+    border-radius: 22px;
+
+    border: 2px solid #502274;
+
+    position: relative;
+
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+
+    color: #EEB4B3;
+}
+
+
+/* CLOSE BUTTON */
+
+.close-button {
+    position: absolute;
+
+    right: 18px;
+    top: 15px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #C179B9;
+
+    font-size: 28px;
+
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: #EEB4B3;
+}
+
+
+/* -------------------------
+   FORM
+------------------------- */
+
+#event-form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 9px;
+}
+
+#event-form label {
+    font-size: 13px;
+
+    color: #C179B9;
+
+    font-weight: bold;
+
+    margin-top: 5px;
+}
+
+#event-form input,
+#event-form select {
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #502274;
+
+    border-radius: 8px;
+
+    background-color: #2F242C;
+
+    color: white;
+
+    font-size: 15px;
+}
+
+#event-form input:focus,
+#event-form select:focus {
+    outline: none;
+
+    border-color: #A42CD6;
+}
+
+
+/* -------------------------
+   SAVE BUTTON
+------------------------- */
+
+.save-button {
+    margin-top: 15px;
+
+    padding: 13px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background-color: #A42CD6;
+
+    color: white;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.save-button:hover {
+    background-color: #C179B9;
+}
+
+
+/* -------------------------
+   HIDDEN
+------------------------- */
+
+.hidden {
+    display: none;
+}
+
+
+/* -------------------------
+   MOBILE
+------------------------- */
+
+@media (max-width: 800px) {
+
+    header {
+        padding: 25px 15px 10px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    main {
+        padding: 0 15px 100px;
+    }
+
+    .week-days {
+        overflow-x: auto;
+
+        grid-template-columns:
+            repeat(7, minmax(120px, 1fr));
+    }
+
+    .week-day {
+        min-height: 450px;
+    }
+
+    .day-event {
+        grid-template-columns:
+            65px 60px 1fr 40px;
+
+        gap: 10px;
+    }
+
+    .day-event-icon {
+        width: 55px;
+        height: 70px;
+
+        border-radius: 22px;
+
+        font-size: 23px;
+    }
+
+    .day-event-info h3 {
+        font-size: 16px;
+    }
+
+    .day-event-info p {
+        font-size: 13px;
+    }
+}
