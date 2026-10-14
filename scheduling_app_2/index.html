@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Day</title>
+    <meta name="theme-color" content="#248232">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="My Day">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <div class="logo-icon">✓</div>
+                <span>My Day</span>
+            </div>
+
+            <button class="new-task-button" onclick="openTaskEditor()">
+                <span>+</span>
+                New Task
+            </button>
+
+            <nav class="sidebar-nav">
+
+                <button class="nav-item active"
+                    onclick="showPage('today', this)">
+                    <span class="nav-icon">☀</span>
+                    <span>Today</span>
+                </button>
+
+                <button class="nav-item"
+                    onclick="showPage('inbox', this)">
+                    <span class="nav-icon">▱</span>
+                    <span>Inbox</span>
+                    <span id="inboxCount" class="count">0</span>
+                </button>
+
+                <button class="nav-item"
+                    onclick="showPage('week', this)">
+                    <span class="nav-icon">▦</span>
+                    <span>Week</span>
+                </button>
+
+                <button class="nav-item"
+                    onclick="showPage('month', this)">
+                    <span class="nav-icon">▣</span>
+                    <span>Month</span>
+                </button>
+
+                <button class="nav-item"
+                    onclick="showPage('goals', this)">
+                    <span class="nav-icon">◎</span>
+                    <span>Goals</span>
+                </button>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <div class="progress-title">
+                    <span>Today's Progress</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+
+                <div class="progress-bar">
+                    <div id="progressFill"></div>
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- MAIN -->
+        <main class="main">
+
+            <!-- TOP BAR -->
+            <header class="topbar">
+
+                <div>
+                    <p class="small-label">YOUR SCHEDULE</p>
+                    <h1 id="pageTitle">Today</h1>
+                </div>
+
+                <div class="topbar-actions">
+
+                    <button class="today-button"
+                        onclick="goToToday()">
+                        Today
+                    </button>
+
+                    <button class="header-add save-button" onclick="openTaskEditor()">+ Add task</button>
+                    <button class="settings-button">
+                        ⚙
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- DATE SELECTOR -->
+            <section class="date-selector">
+
+                <button class="date-arrow"
+                    onclick="changeDate(-1)">
+                    ‹
+                </button>
+
+                <label class="date-jump">Go to date<input id="jumpDate" type="date" aria-label="Go to date"></label>
+                <div id="dateContainer"
+                    class="dates">
+                </div>
+
+                <button class="date-arrow"
+                    onclick="changeDate(1)">
+                    ›
+                </button>
+
+            </section>
+
+
+            <!-- TODAY -->
+            <section id="todayPage" class="page">
+
+                <div class="day-header">
+
+                    <div>
+
+                        <h2 id="selectedDateTitle">
+                            Today
+                        </h2>
+
+                        <p id="selectedDateSubtitle">
+                        </p>
+
+                    </div>
+
+                    <div class="day-stats">
+                        <span id="taskCount">
+                            0 tasks
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- GOAL POOL -->
+                <div class="goal-pool-section">
+
+                    <div class="goal-pool-header">
+
+                        <div>
+                            <p class="small-label">
+                                GOAL POOL
+                            </p>
+
+                            <h2>
+                                Goals to Work On
+                            </h2>
+
+                            <p class="form-help">
+                                Schedule a goal whenever you want to work on it.
+                            </p>
+                        </div>
+
+                        <button
+                            class="goal-view-button"
+                            onclick="showPage('goals')"
+                        >
+                            View Goals
+                        </button>
+
+                    </div>
+
+                    <div id="goalPool"
+                        class="goal-pool">
+                    </div>
+
+                </div>
+
+
+                <p id="upNext" class="up-next" aria-live="polite"></p>
+                <div class="view-switch" role="group" aria-label="Schedule view"><button id="timelineView" onclick="setDayView('timeline')">Timeline</button><button id="agendaView" onclick="setDayView('agenda')">Agenda</button></div>
+                <div id="agendaList" class="agenda-list" hidden></div>
+                <details class="schedule-tips"><summary>How to schedule</summary><p class="form-help"><span class="phone-schedule-help">Use the plus button to add a task. Tap a task to edit its time or duration, or tap its circle to mark it complete.</span><span class="desktop-schedule-help">Click an empty time to add a task. Drag a task to move it; drag its bottom edge to resize. Keyboard: Enter to edit, arrows to move, Shift + arrows to resize. Moving a repeating task changes only that occurrence.</span></p></details>
+                <div id="untimedTasks" class="untimed-tasks"></div>
+                <!-- DAILY TIMELINE -->
+                <div id="phoneDaySchedule" class="phone-day-schedule" aria-label="Day schedule"></div>
+                <button class="phone-schedule-add" type="button" aria-label="Add task" onclick="openTaskEditor()">+</button>
+                <div class="timeline-container">
+
+                    <div id="timeline"
+                        class="timeline">
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- INBOX -->
+            <section id="inboxPage"
+                class="page hidden">
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <p class="small-label">
+                            UNSCHEDULED
+                        </p>
+
+                        <h2>Inbox</h2>
+
+                        <p>
+                            Tasks you haven't scheduled yet.
+                        </p>
+
+                    </div>
+
+                    <button class="primary-button"
+                        onclick="openTaskEditor(true)">
+                        + Add Task
+                    </button>
+
+                </div>
+
+                <div id="inboxTasks"
+                    class="inbox-tasks">
+                </div>
+
+            </section>
+
+
+            <!-- WEEK -->
+            <section id="weekPage"
+                class="page hidden">
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <p class="small-label">
+                            YOUR WEEK
+                        </p>
+
+                        <h2>
+                            <span id="weekHeading">Weekly Overview</span>
+                        </h2>
+
+                        <p>
+                            See what's coming up.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div id="weekContainer"
+                    class="week-container">
+                </div>
+
+            </section>
+
+
+            <!-- MONTH -->
+            <section id="monthPage"
+                class="page hidden">
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <p class="small-label">
+                            YOUR MONTH
+                        </p>
+
+                        <h2>
+                            <span id="monthHeading">Monthly Overview</span>
+                        </h2>
+
+                        <p>
+                            Plan your month at a glance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div id="monthContainer"
+                    class="month-container">
+                </div>
+
+            </section>
+
+
+            <!-- GOALS -->
+            <section id="goalsPage"
+                class="page hidden">
+
+                <div class="page-heading">
+
+                    <div>
+
+                        <p class="small-label">
+                            YOUR GOALS
+                        </p>
+
+                        <h2>
+                            Goals
+                        </h2>
+
+                        <p>
+                            Build habits and track your progress.
+                        </p>
+
+                    </div>
+
+                    <button class="primary-button"
+                        onclick="openGoalEditor()">
+                        + New Goal
+                    </button>
+
+                </div>
+
+                <div class="goal-report-controls">
+                    <div class="view-switch" role="group" aria-label="Goal progress period"><button id="goalMonthView" onclick="setGoalProgressView('month')">Month</button><button id="goalYearView" onclick="setGoalProgressView('year')">Year</button></div>
+                    <div class="goal-report-navigation"><button type="button" aria-label="Previous progress period" onclick="changeGoalProgressPeriod(-1)">&lsaquo;</button><strong id="goalProgressHeading" aria-live="polite"></strong><button type="button" aria-label="Next progress period" onclick="changeGoalProgressPeriod(1)">&rsaquo;</button></div>
+                </div>
+                <p class="form-help">Monthly and yearly targets count planned recurrence dates, or prorate flexible targets across calendar days. Donut charts show completed sessions only; scheduled sessions are listed separately. Earlier targets are preserved when you change frequency.</p>
+                <div id="goalProgressSummary" class="goal-report-summary" aria-live="polite"></div>
+                <div id="goalYearChart" class="goal-year-chart" hidden aria-label="Monthly completed goal sessions"></div>
+                <h3 class="all-goals-heading">All goals</h3>
+                <div id="goalsContainer"
+                    class="goals-container">
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =====================================================
+         TASK MODAL
+    ====================================================== -->
+
+    <div id="taskModal"
+        class="modal hidden">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <p class="small-label">
+                        TASK
+                    </p>
+
+                    <h2 id="modalTitle">
+                        New Task
+                    </h2>
+
+                </div>
+
+                <button class="close-button"
+                    onclick="closeTaskEditor()">
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="taskForm">
+
+                <!-- TASK NAME -->
+
+                <label for="taskName">
+                    Task name
+                </label>
+
+                <input
+                    type="text"
+                    id="taskName"
+                    placeholder="What do you need to do?"
+                    required
+                >
+
+
+                <!-- DATE / TIME -->
+
+                <div class="form-row">
+
+                    <div>
+
+                        <label for="taskDate">
+                            Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="taskDate"
+                        >
+
+                    </div>
+
+                    <div>
+
+                        <label for="taskTime">
+                            Start time
+                        </label>
+
+                        <input
+                            type="time"
+                            id="taskTime"
+                            value="09:00"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- DURATION / ICON -->
+
+                <div class="form-row">
+
+                    <div>
+
+                        <label for="taskDuration">
+                            Duration
+                        </label>
+
+                        <select id="taskDuration">
+
+                            <option value="15">
+                                15 minutes
+                            </option>
+
+                            <option value="30">
+                                30 minutes
+                            </option>
+
+                            <option value="45">
+                                45 minutes
+                            </option>
+
+                            <option value="60" selected>
+                                1 hour
+                            </option>
+
+                            <option value="90">
+                                1.5 hours
+                            </option>
+
+                            <option value="120">
+                                2 hours
+                            </option>
+
+                            <option value="180">
+                                3 hours
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div>
+
+                        <label for="taskIcon">
+                            Icon
+                        </label>
+
+                        <select id="taskIcon">
+                            <option value="" selected>No icon</option>
+
+                            <option value="📚">
+                                📚 Study
+                            </option>
+
+                            <option value="💻">
+                                💻 Computer
+                            </option>
+
+                            <option value="🏋️">
+                                🏋️ Workout
+                            </option>
+
+                            <option value="🎸">
+                                🎸 Music
+                            </option>
+
+                            <option value="🍔">
+                                🍔 Food
+                            </option>
+
+                            <option value="💼">
+                                💼 Work
+                            </option>
+
+                            <option value="🏠">
+                                🏠 Home
+                            </option>
+
+                            <option value="🚗">
+                                🚗 Travel
+                            </option>
+
+                            <option value="⭐">
+                                ⭐ Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- REPEAT -->
+
+                <label for="taskRepeat">
+                    Repeat
+                </label>
+
+                <select id="taskRepeat">
+                    <option value="custom">Custom days of the week</option>
+
+                    <option value="none" selected>
+                        Does not repeat
+                    </option>
+
+                    <option value="weekdays">Every weekday (Mon?Fri)</option>
+                    <option value="daily">
+                        Every day
+                    </option>
+
+                    <option value="weekly">
+                        Every week
+                    </option>
+
+                    <option value="monthly">
+                        Every month
+                    </option>
+
+                </select>
+
+
+                <div id="taskWeekdays" class="weekday-picker" role="group" aria-label="Repeat task on these weekdays" hidden></div>
+                <div id="taskScopeRow" class="hidden">
+                    <label for="taskScope">Apply changes or deletion to</label>
+                    <select id="taskScope"><option value="occurrence">This occurrence</option><option value="series">The whole series</option></select>
+                    <p id="scopeHelp" class="form-help"></p>
+                </div>
+                <!-- COLOR -->
+
+                <label>
+                    Color
+                </label>
+
+                <div class="color-options">
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="color"
+                            value="purple"
+                            checked
+                        >
+
+                        <span class="color-dot purple">
+                        </span>
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="color"
+                            value="blue"
+                        >
+
+                        <span class="color-dot blue">
+                        </span>
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="color"
+                            value="green"
+                        >
+
+                        <span class="color-dot green">
+                        </span>
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="color"
+                            value="orange"
+                        >
+
+                        <span class="color-dot orange">
+                        </span>
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="color"
+                            value="pink"
+                        >
+
+                        <span class="color-dot pink">
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <!-- NOTES -->
+
+                <label for="taskNotes">
+                    Notes
+                </label>
+
+                <textarea
+                    id="taskNotes"
+                    placeholder="Add some notes..."
+                    rows="3"
+                ></textarea>
+
+
+                <!-- GOAL TASK INFORMATION -->
+
+                <div id="goalTaskNotice"
+                    class="goal-task-notice hidden">
+                </div>
+
+
+                <!-- FORM BUTTONS -->
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        id="deleteButton"
+                        class="delete-button hidden"
+                        onclick="deleteCurrentTask()"
+                    >
+                        Delete
+                    </button>
+
+
+                    <div class="right-actions">
+
+                        <button
+                            type="button"
+                            class="cancel-button"
+                            onclick="closeTaskEditor()"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="save-button"
+                        >
+                            Save Task
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         GOAL MODAL
+    ====================================================== -->
+
+    <div id="goalModal"
+        class="modal hidden">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <p class="small-label">
+                        GOAL
+                    </p>
+
+                    <h2 id="goalModalTitle">
+                        New Goal
+                    </h2>
+
+                </div>
+
+                <button class="close-button"
+                    onclick="closeGoalEditor()">
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="goalForm">
+                <label for="goalEffectiveDate">Target changes take effect on</label>
+                <input id="goalEffectiveDate" type="date" required>
+                <p class="form-help">Earlier targets are preserved. Automatic schedules count their planned dates; flexible targets are prorated across calendar periods.</p>
+                <label for="goalRepeat">Automatic schedule</label>
+                <select id="goalRepeat">
+                    <option value="custom">Custom days of the week</option>
+                    <option value="none" selected>Schedule manually</option>
+                    <option value="daily">Every day</option>
+                    <option value="weekdays">Every weekday (Mon-Fri)</option>
+                    <option value="weekly">Every week</option>
+                    <option value="monthly">Every month</option>
+                </select>
+                <div id="goalWeekdays" class="weekday-picker" role="group" aria-label="Repeat goal on these weekdays" hidden></div>
+                <div id="goalScheduleFields" hidden>
+                    <div class="form-row">
+                        <div><label for="goalStartDate">Starting date</label><input id="goalStartDate" type="date"></div>
+                        <div><label for="goalTime">Start time</label><input id="goalTime" type="time" step="900"></div>
+                    </div>
+                    <p class="form-help">Sessions appear automatically using this time and the goal's duration. Edit or skip individual sessions in your schedule. Switching to manual removes the automatic series; manually scheduled sessions stay.</p>
+                </div>
+
+                <!-- GOAL NAME -->
+
+                <label for="goalName">
+                    Goal name
+                </label>
+
+                <input
+                    type="text"
+                    id="goalName"
+                    placeholder="What do you want to accomplish?"
+                    required
+                >
+
+
+                <!-- TARGET / PERIOD -->
+
+                <div class="form-row">
+
+                    <div>
+
+                        <label for="goalTarget">
+                            How many times?
+                        </label>
+
+                        <input
+                            type="number"
+                            id="goalTarget"
+                            min="1"
+                            max="100"
+                            value="4"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div>
+
+                        <label for="goalPeriod">
+                            Per
+                        </label>
+
+                        <select id="goalPeriod">
+
+                            <option value="day">
+                                Day
+                            </option>
+
+                            <option value="week">
+                                Week
+                            </option>
+
+                            <option value="month">
+                                Month
+                            </option>
+
+                            <option value="year">
+                                Year
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DURATION / ICON -->
+
+                <div class="form-row">
+
+                    <div>
+
+                        <label for="goalDuration">
+                            Default duration
+                        </label>
+
+                        <select id="goalDuration">
+
+                            <option value="15">
+                                15 minutes
+                            </option>
+
+                            <option value="30">
+                                30 minutes
+                            </option>
+
+                            <option value="45">
+                                45 minutes
+                            </option>
+
+                            <option value="60" selected>
+                                1 hour
+                            </option>
+
+                            <option value="90">
+                                1.5 hours
+                            </option>
+
+                            <option value="120">
+                                2 hours
+                            </option>
+
+                            <option value="180">
+                                3 hours
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div>
+
+                        <label for="goalIcon">
+                            Icon
+                        </label>
+
+                        <select id="goalIcon">
+                            <option value="" selected>No icon</option>
+
+                            <option value="🏋️">
+                                🏋️ Workout
+                            </option>
+
+                            <option value="📚">
+                                📚 Study
+                            </option>
+
+                            <option value="💻">
+                                💻 Computer
+                            </option>
+
+                            <option value="🎸">
+                                🎸 Music
+                            </option>
+
+                            <option value="🏃">
+                                🏃 Running
+                            </option>
+
+                            <option value="📖">
+                                📖 Reading
+                            </option>
+
+                            <option value="🧘">
+                                🧘 Wellness
+                            </option>
+
+                            <option value="⭐">
+                                ⭐ Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- GOAL COLOR -->
+
+                <label>
+                    Color
+                </label>
+
+                <div class="color-options">
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="goalColor"
+                            value="purple"
+                            checked
+                        >
+
+                        <span class="color-dot purple">
+                        </span>
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="goalColor"
+                            value="blue"
+                        >
+
+                        <span class="color-dot blue">
+                        </span>
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="goalColor"
+                            value="green"
+                        >
+
+                        <span class="color-dot green">
+                        </span>
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="goalColor"
+                            value="orange"
+                        >
+
+                        <span class="color-dot orange">
+                        </span>
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="radio"
+                            name="goalColor"
+                            value="pink"
+                        >
+
+                        <span class="color-dot pink">
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <label for="goalNotes">
+                    Description
+                </label>
+
+                <textarea
+                    id="goalNotes"
+                    placeholder="Optional description..."
+                    rows="3"
+                ></textarea>
+
+
+                <!-- GOAL FORM BUTTONS -->
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        id="deleteGoalButton"
+                        class="delete-button hidden"
+                        onclick="deleteCurrentGoal()"
+                    >
+                        Delete
+                    </button>
+
+
+                    <div class="right-actions">
+
+                        <button
+                            type="button"
+                            class="cancel-button"
+                            onclick="closeGoalEditor()"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="save-button"
+                        >
+                            Save Goal
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="settingsTitle">Settings &amp; backups</h2><button type="button" class="close-button" onclick="closeModal('settingsModal')">&times;</button></div>
+            <form id="settingsForm">
+                <label for="themeChoice">Color theme</label>
+                <select id="themeChoice"><option value="forest">Forest ? green &amp; porcelain</option><option value="ocean">Ocean ? blue &amp; pumpkin</option></select>
+                <p class="form-help">Choose a palette and save settings. Your theme is remembered in this browser.</p>
+                <div class="form-row">
+                    <div><label for="visibleStart">Day begins</label><select id="visibleStart"></select></div>
+                    <div><label for="visibleEnd">Day ends</label><select id="visibleEnd"></select></div>
+                </div>
+                <p class="form-help">The timeline expands to include tasks outside these hours. Sessions crossing midnight continue on the next day.</p>
+                <label for="weekStart">Week starts on</label><select id="weekStart"><option value="0">Sunday</option><option value="1">Monday</option></select>
+                <p id="settingsError" class="form-error" role="alert"></p>
+                <div class="right-actions"><button type="button" class="cancel-button" onclick="closeModal('settingsModal')">Cancel</button><button type="submit" class="save-button">Save settings</button></div>
+            </form>
+            <div class="backup-section"><h3>Backups</h3><p>Your schedule is stored in this browser. Export a copy to keep it or transfer it to another browser.</p><button type="button" class="primary-button" onclick="exportBackup()">Export backup</button><label for="importFile">Restore backup (replaces current data; Undo is available)</label><input id="importFile" type="file" accept="application/json,.json"></div>
+        </div>
+    </div>
+    <div id="statusBar" class="status-bar" hidden><span id="statusMessage" role="status"></span><button id="undoButton" type="button" onclick="undoChange()" hidden>Undo</button><button type="button" aria-label="Dismiss message" onclick="$('statusBar').hidden=true">&times;</button></div>
+    <script src="script.js"></script>
+    <script src="pwa.js"></script>
+
+</body>
+
+</html>

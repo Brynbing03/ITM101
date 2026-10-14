@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "My Day",
+  "short_name": "My Day",
+  "description": "Plan your day, schedule goal sessions, and track your progress.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FCFFFC",
+  "theme_color": "#248232",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
