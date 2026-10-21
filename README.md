@@ -104,3 +104,16 @@ node scheduling_app_2/pwa-tests.cjs
 The browser checks use a fresh temporary Chrome profile, keeping your browser data separate. Set `CHROME_PATH` if Chrome is installed somewhere other than the default Windows location. The checks load only a generated local test page.
 
 The day schedule on phone and desktop shows the full visible-hour range with task blocks proportional to duration. Time labels and short ticks stay in the side gutter; there are no full-width hourly lines. Use the plus button to add tasks and the editor to change their time or duration.
+<<<<<<< Updated upstream
+=======
+
+## Database tables
+
+profiles
+profile_settings
+goals
+goal_target_history
+tasks
+task_exceptions
+occurrence_completions 
+>>>>>>> Stashed changes
