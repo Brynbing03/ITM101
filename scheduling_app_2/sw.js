@@ -1,10 +1,10 @@
 /* Bump VERSION whenever publishing changes to the app shell. */
-const VERSION = 'v14';
+const VERSION = 'v15';
 const BASE = new URL('./', self.location.href);
 const PREFIX = `my-day:${BASE.pathname}:`;
 const CACHE = PREFIX + VERSION;
 const SHELL = [
-    './index.html', './styles.css', './script.js', './pwa.js',
+    './index.html', './styles.css', './script.js', './pwa.js', './auth.js',
     './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
     './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'
 ].map(path => new URL(path, BASE).href);
@@ -26,6 +26,8 @@ self.addEventListener('fetch', event => {
     const request = event.request;
     if (request.method !== 'GET') return;
     const url = new URL(request.url);
+    // OAuth redirects and session responses must always go to the server.
+    if (url.pathname.startsWith('/.netlify/') || url.searchParams.has('auth_error')) return;
     if (url.origin !== BASE.origin || !url.pathname.startsWith(BASE.pathname)) return;
     const navigation = request.mode === 'navigate';
     const canonical = new URL(url.pathname, BASE.origin).href;

@@ -1,3 +1,9 @@
+.account-section { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.account-section p { margin: 10px 0; overflow-wrap: anywhere; }
+.google-login { display: inline-block; border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; color: var(--text); background: var(--card); text-decoration: none; font-weight: 600; }
+.google-login[hidden], #googleLogout[hidden] { display: none; }
+.google-login:focus-visible { outline: 3px solid var(--forest); outline-offset: 3px; }
+
 * {
     margin: 0;
     padding: 0;

@@ -14,7 +14,15 @@ for (const icon of manifest.icons) {
     assert.equal(`${file.readUInt32BE(16)}x${file.readUInt32BE(20)}`,icon.sizes);
 }
 console.log('PASS Manifest and icon dimensions');
+let signedIn = true;
 const server=http.createServer((req,res)=>{
+    if (new URL(req.url,'http://localhost').pathname === '/.netlify/functions/auth') {
+        if (req.method === 'POST') signedIn = false;
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(JSON.stringify({user: signedIn ? {name:'Test User',email:'test@example.com'} : null}));
+        return;
+    }
     // Exercise hosting from a subdirectory as well as scoped offline caches.
     const relative=new URL(req.url,'http://localhost').pathname.replace(/^\/my-day\//,'');
     if(relative.includes('..')||relative.startsWith('/')){res.writeHead(404).end();return;}
@@ -72,6 +80,14 @@ let browser,ws;
     assert.equal(await evaluate("navigator.serviceWorker.controller.scriptURL.endsWith('/my-day/sw.js')"),true);
     assert.equal(await evaluate("(await caches.keys()).some(key=>key.startsWith('my-day:/my-day/:'))"),true);
     console.log('PASS Service worker installation and subdirectory scope');
+    await until("document.getElementById('accountStatus').textContent.includes('test@example.com')");
+    assert.equal(await evaluate("document.getElementById('googleLogin').hidden"),true);
+    assert.equal(await evaluate("document.getElementById('googleLogout').hidden"),false);
+    await evaluate("document.getElementById('googleLogout').click()");
+    await until("!document.getElementById('googleLogin').hidden");
+    assert.equal(signedIn,false);
+    assert.equal(await evaluate("document.getElementById('googleLogout').hidden"),true);
+    console.log('PASS Account UI shows the signed-in profile and signs out through the server');
     await evaluate("tasks=[{id:'offline-test',name:'Offline test',date:formatDate(new Date()),time:'09:00',duration:60,icon:'⭐',color:'purple',notes:'',repeat:'none',inbox:false}]; settings.theme='ocean'; saveAll(); refreshEverything();");
     await command('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
     await command('Page.reload',{ignoreCache:true});
@@ -88,8 +104,11 @@ let browser,ws;
     assert.equal(await evaluate("(await fetch('./icons/icon-192.png')).ok"),true);
     assert.equal(await evaluate("(await (await fetch('./manifest.webmanifest')).json()).name"),'My Day');
     console.log('PASS App icons and manifest available offline');
+    assert.equal(await evaluate("document.getElementById('accountStatus').textContent.includes('Connect to the internet')"),true);
+    assert.equal(await evaluate("await fetch('/.netlify/functions/auth?action=login').then(()=>false,()=>true)"),true);
+    console.log('PASS Offline authentication stays unavailable instead of serving a cached app page');
     // Cross-app caches on the same origin must survive our worker cleanup.
-    await evaluate("await caches.open('other-app-cache');await caches.open('my-day:/my-day/:old');const registration=await navigator.serviceWorker.getRegistration();const text=await (await caches.open('my-day:/my-day/:v14')).match(new URL('./index.html',location.href));if(!text)throw Error('Missing shell');");
+    await evaluate("await caches.open('other-app-cache');await caches.open('my-day:/my-day/:old');const key=(await caches.keys()).find(key=>key.startsWith('my-day:/my-day/:v'));const cache=await caches.open(key);if(!await cache.match(new URL('./index.html',location.href)))throw Error('Missing shell');if(!await cache.match(new URL('./auth.js',location.href)))throw Error('Missing account UI');");
     assert.equal(await evaluate("(await caches.keys()).includes('other-app-cache')"),true);
     console.log('PASS Cache storage uses app-specific names');
     await send('Browser.close');

@@ -1,0 +1,14 @@
+{
+  "name": "my-day",
+  "private": true,
+  "scripts": {
+    "test": "node --test auth-tests.mjs && node scheduling_app_2/tests.cjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@netlify/database": "2.0.1",
+    "google-auth-library": "10.9.1"
+  }
+}

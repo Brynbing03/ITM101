@@ -1063,6 +1063,13 @@
     <div id="settingsModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header"><h2 id="settingsTitle">Settings &amp; backups</h2><button type="button" class="close-button" onclick="closeModal('settingsModal')">&times;</button></div>
+            <section class="account-section" aria-labelledby="accountTitle">
+                <h3 id="accountTitle">Your account</h3>
+                <p id="accountStatus" role="status">Checking sign-in status...</p>
+                <a id="googleLogin" class="google-login" href="/.netlify/functions/auth?action=login" hidden>Sign in with Google</a>
+                <button id="googleLogout" type="button" class="primary-button" hidden>Sign out</button>
+                <p class="form-help">Google verifies your identity. Your account profile is saved securely. Tasks and goals are still saved in this browser.</p>
+            </section>
             <form id="settingsForm">
                 <label for="themeChoice">Color theme</label>
                 <select id="themeChoice"><option value="forest">Forest ? green &amp; porcelain</option><option value="ocean">Ocean ? blue &amp; pumpkin</option></select>
@@ -1082,6 +1089,7 @@
     <div id="statusBar" class="status-bar" hidden><span id="statusMessage" role="status"></span><button id="undoButton" type="button" onclick="undoChange()" hidden>Undo</button><button type="button" aria-label="Dismiss message" onclick="$('statusBar').hidden=true">&times;</button></div>
     <script src="script.js"></script>
     <script src="pwa.js"></script>
+    <script src="auth.js"></script>
 
 </body>
 

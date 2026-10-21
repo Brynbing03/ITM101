@@ -1,5 +1,61 @@
 # My Day
 
+## Google accounts on Netlify
+
+Google sign-in and sign-out are available under **Settings → Your account** after the configuration below is deployed. Google verifies the account; Netlify Database stores the Google account ID, email, display name, login dates, and expiring app sessions. Google passwords and provider tokens are not stored. Repeat sign-ins update the same account using Google's stable subject ID.
+
+Tasks, goals, settings, and backups still use browser storage. Signing in does not upload them, isolate them by account, or sync them between devices. The scheduler remains available without signing in.
+
+### Configure Google
+
+1. Open [Google Cloud Console](https://console.cloud.google.com/) and select or create a project. Configure the Google Auth Platform branding, audience, and contact information. If the app is in Testing, add the Google accounts that will test it as test users. Use External audience if people outside your school organization need access.
+2. Create an OAuth client with application type **Web application**.
+3. Add this exact **Authorized redirect URI**, including the query string:
+
+   ```text
+   https://magnificent-tarsier-51948c.netlify.app/.netlify/functions/auth?action=callback
+   ```
+
+4. Keep the client ID and client secret for Netlify configuration. This redirect flow does not require a browser Google SDK or an authorized JavaScript origin.
+
+### Configure and deploy Netlify
+
+Use the `ITM101` repository root (the folder containing this README) as the Netlify base directory. If Netlify uses the larger school repository instead, set its base directory to `intro_to_cloud_technologies/ITM101`. Remove a base-directory setting pointing inside `scheduling_app_2`. The checked-in `netlify.toml` sets the publish directory to `scheduling_app_2` and the Functions directory to `netlify/functions`.
+
+In your Netlify project's environment variables, add these values with **Functions** scope (or all scopes):
+
+| Variable | Value |
+| --- | --- |
+| `APP_ORIGIN` | `https://magnificent-tarsier-51948c.netlify.app` |
+| `GOOGLE_CLIENT_ID` | Your Google web OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Your Google web OAuth client secret |
+| `SESSION_SECRET` | A random secret at least 32 characters long |
+
+Generate the session secret locally with:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Keep these secrets in Netlify, outside the published folder and Git. `.env.example` lists the names for local setup. No database URL is sent to the browser: `@netlify/database` uses the database connection supplied by Netlify to the server function.
+
+Deploy the repository through a Netlify build so dependencies and Functions are included; uploading only the static HTML folder will not install authentication. Netlify's native migrations apply `netlify/database/migrations/202610210001_google_auth.sql`, creating `myday_users` and `myday_sessions` in the database attached to this site. No existing tables are modified.
+
+After deployment:
+
+1. Open the site, then **Settings → Your account → Sign in with Google**.
+2. Choose a test account and verify that your name/email appear after returning.
+3. In Netlify Database, verify a `myday_users` row and a `myday_sessions` row. Sign out and confirm the session row is removed. Signing in again should update the existing user.
+4. Refresh while signed in; the session should persist. It expires after seven days. An expired or revoked session returns the UI to signed-out status.
+
+Sessions use HttpOnly, Secure, SameSite cookies; only a hash of the session token is stored in the database. OAuth uses signed short-lived state, nonce validation, and PKCE, and Google's server library validates ID tokens. Authentication requests bypass the offline service worker. This integration identifies users but does not restrict access to the static scheduler; any future private-data endpoints must check the database session before reading or writing user data.
+
+For local integration testing, install dependencies with `npm install`, link the correct site with the Netlify CLI, and run `netlify dev` from this directory on port 8888. Use `APP_ORIGIN=http://localhost:8888` locally and register `http://localhost:8888/.netlify/functions/auth?action=callback` as an additional Google redirect URI. Store local values in an ignored `.env`; do not replace the production origin in Netlify. Use a local/development database. Preview deploy addresses are intentionally rejected unless explicitly configured with their own origin and matching Google redirect URI.
+
+Run `npm test` for authentication checks and scheduling regression checks. The authentication checks use simulated Google/database responses; a real Google login and database migration must also be verified on Netlify after credentials are configured.
+
+References: [Google server OAuth](https://developers.google.com/identity/protocols/oauth2/web-server), [Google token verification](https://developers.google.com/identity/sign-in/web/backend-auth), [Netlify Database API](https://docs.netlify.com/build/data-and-storage/netlify-database/api/), [Netlify migrations](https://docs.netlify.com/build/data-and-storage/netlify-database/migrations/).
+
 Open `index.html` in a browser. Tasks, goals, settings, and completion history are stored locally in that browser; existing saved tasks and goals are retained.
 
 The app opens to a single day. Use the arrows or date picker to change dates; on phones, swipe left for the next day or right for the previous day. Vertical swipes scroll. Week and Month remain available in navigation. On phones, tap a task to edit its time or duration; dragging remains available with a mouse.
@@ -25,7 +81,7 @@ The app opens to a single day. Use the arrows or date picker to change dates; on
 
 This folder now includes an app manifest, phone icons, and a service worker that caches the app for offline use. Installation requires an HTTPS website address; opening `index.html` directly is still useful for previews but does not enable installation or offline caching.
 
-Publish the contents of this folder to a static HTTPS host. No build step is needed. Include `index.html`, `styles.css`, `script.js`, `pwa.js`, `sw.js`, `manifest.webmanifest`, and the `icons` folder. The README and test files do not need to be published. Files can also be hosted in a subdirectory.
+For a static preview without Google sign-in, publish the contents of `scheduling_app_2` to a static HTTPS host. Include `index.html`, `styles.css`, `script.js`, `auth.js`, `pwa.js`, `sw.js`, `manifest.webmanifest`, and the `icons` folder. For Google sign-in, use the full Netlify deployment described above. The README and test files do not need to be published. Static previews can also be hosted in a subdirectory.
 
 Open the hosted address online once and check **Settings → Use on your phone** for the offline-ready message. On iPhone, use Safari's Share → Add to Home Screen and enable **Open as Web App** if shown. On Android, use Chrome's installation menu or the **Install My Day** button in Settings when available.
 
@@ -38,11 +94,11 @@ Tasks and settings remain local to each browser or installed app. Export a backu
 With Node available:
 
 ```powershell
-node --check experiments/scheduling_app_2/script.js
-node experiments/scheduling_app_2/tests.cjs
-node experiments/scheduling_app_2/browser-tests.cjs
-node experiments/scheduling_app_2/browser-tests.cjs --mobile
-node experiments/scheduling_app_2/pwa-tests.cjs
+node --check scheduling_app_2/script.js
+npm test
+node scheduling_app_2/browser-tests.cjs
+node scheduling_app_2/browser-tests.cjs --mobile
+node scheduling_app_2/pwa-tests.cjs
 ```
 
 The browser checks use a fresh temporary Chrome profile, keeping your browser data separate. Set `CHROME_PATH` if Chrome is installed somewhere other than the default Windows location. The checks load only a generated local test page.
