@@ -266,7 +266,16 @@ function renderTimeline() {
         // Use the editor for changes; gestures on the timeline scroll or change days.
         timeline.append(card);
     }
-    timeline.onclick=null;
+    timeline.onclick=event=>{
+        // Existing cards keep their edit behavior; only empty calendar space adds.
+        if(event.target.closest('.task-card')) return;
+        const rect=timeline.getBoundingClientRect();
+        const pixelsPerMinute=65/60;
+        const clickedMinute=Number(timeline.dataset.start)+Math.round((event.clientY-rect.top-15)/pixelsPerMinute/15)*15;
+        const latest=Math.max(Number(timeline.dataset.start),Number(timeline.dataset.end)-15);
+        const minute=Math.max(Number(timeline.dataset.start),Math.min(latest,clickedMinute));
+        openTaskEditor(false,null,null,timeValue(minute));
+    };
     const untimed=dayTasks.filter(t=>!t.time);
     $('untimedTasks').replaceChildren();
     for(const task of untimed) $('untimedTasks').append(taskButton(task,date,'Unscheduled time'));
@@ -520,9 +529,24 @@ function renderGoals() {
     if(!goals.length){$('goalsContainer').innerHTML='<div class="goals-empty">Set a goal, schedule time for it, and track your progress here.</div>';return;}
     for(const goal of goals){const s=goalStats(goal,goalProgressDate),totals=report.byGoal.get(goal.id),card=document.createElement('div');card.className='goal-card';card.innerHTML=`<div class="goal-card-top"><div class="goal-card-icon goal-icon-${goal.color}">${escapeHtml(goal.icon)}</div><div class="goal-card-info"><h3>${escapeHtml(goal.name)}</h3><p>${goal.target} sessions per ${goal.period} · ${periodLabel(goal,goalProgressDate)}</p></div><button class="goal-edit-button" aria-label="Edit ${escapeHtml(goal.name)}">✎</button></div><div class="goal-calendar-progress"><div class="goal-calendar-donut" style="--completed:${totals.percentage}%" role="img" aria-label="${totals.percentage}% complete for ${heading}"><span>${totals.expected>0?totals.percentage+'%':'—'}</span></div><div><strong>${totals.completed} / ${formatExpected(totals.expected)} sessions</strong><p>${heading}</p><p>${totals.scheduled} scheduled · ${formatExpected(totals.remaining)} remaining</p>${totals.completed>totals.expected?`<p>${formatExpected(totals.completed-totals.expected)} extra completed</p>`:''}</div></div><div class="goal-progress-area"><div class="progress-ring" style="--progress:${s.percentage}%"><span>${s.percentage}%</span></div><div class="goal-progress-info"><div class="goal-progress-number">${s.completed} / ${goal.target}</div><div class="goal-progress-label">${s.scheduled} scheduled · ${s.needed} still needed</div></div></div>${goal.description?`<div class="goal-description">${escapeHtml(goal.description)}</div>`:''}<button class="goal-pool-button goal-schedule">Schedule a session</button>`;card.querySelector('.goal-edit-button').onclick=()=>openGoalEditor(goal.id);card.querySelector('.goal-schedule').onclick=()=>scheduleGoal(goal.id);$('goalsContainer').append(card);}
 }
+const themeMeta={
+    forest:{label:'Forest',colors:['#248232','#2BA84A','#FCFFFC']},ocean:{label:'Ocean',colors:['#004E98','#FF6700','#EBEBEB']},
+    sunset:{label:'Sunset',colors:['#C44536','#F28F3B','#FFF4E6']},lavender:{label:'Lavender',colors:['#6C4AB6','#B98BFF','#F7F2FF']},
+    rose:{label:'Rose',colors:['#B8336A','#E07A9A','#FFF1F5']},mint:{label:'Mint',colors:['#087F5B','#52B788','#EDFFF7']},
+    teal:{label:'Teal',colors:['#007C83','#00A6A6','#ECFFFF']},slate:{label:'Slate',colors:['#315872','#6FA3C2','#F1F7FA']},
+    amber:{label:'Amber',colors:['#B45309','#E9A23B','#FFF9E8']},berry:{label:'Berry',colors:['#7B2CBF','#C77DFF','#FAF2FF']},
+    midnight:{label:'Midnight',colors:['#536DFE','#80CBC4','#101827']},sand:{label:'Sand',colors:['#A44A3F','#D98E62','#FFF8ED']}
+};
 function applyTheme() {
-    document.documentElement.dataset.theme = settings.theme === 'ocean' ? 'ocean' : 'forest';
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', settings.theme === 'ocean' ? '#004E98' : '#248232');
+    const theme=themeMeta[settings.theme]?settings.theme:'forest';
+    settings.theme=theme;
+    document.documentElement.dataset.theme=theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',themeMeta[theme].colors[0]);
+}
+function updateThemePreview() {
+    const theme=themeMeta[$('themeChoice')?.value]||themeMeta.forest;
+    const preview=$('themePreview');
+    if(preview) preview.innerHTML=`<span class="theme-preview-label">${theme.label} palette</span><span class="theme-swatch-row">${theme.colors.map(color=>`<span class="theme-swatch" style="background:${color}" aria-label="${color}"></span>`).join('')}</span>`;
 }
 function refreshEverything() {
     const phoneFocused=document.activeElement?.closest('.phone-schedule-row');
@@ -580,10 +604,10 @@ function syncTaskWeekdays() {
     $('taskWeekdays').hidden=$('taskRepeat').value!=='custom';
     $('taskWeekdays').querySelectorAll('button').forEach(button=>button.disabled=$('taskRepeat').disabled);
 }
-function openTaskEditor(inbox=false,id=null,sourceDate=null) {
+function openTaskEditor(inbox=false,id=null,sourceDate=null,initialTime=null) {
     setWeekdays('taskWeekdays',tasks.find(t=>t.id===id)?.repeatDays||[]);
     editingTaskId=id;editingDate=sourceDate;draftGoalId=null;$('taskForm').reset();$('taskDate').value=inbox?'':formatDate(selectedDate);
-    $('taskTime').value='09:00';setSelect('taskDuration',60);$('taskScopeRow').classList.add('hidden');$('goalTaskNotice').classList.add('hidden');$('deleteButton').classList.toggle('hidden',id===null);
+    $('taskTime').value=initialTime||'09:00';setSelect('taskDuration',60);$('taskScopeRow').classList.add('hidden');$('goalTaskNotice').classList.add('hidden');$('deleteButton').classList.toggle('hidden',id===null);
     $('modalTitle').textContent=id===null?'New Task':'Edit Task';
     if(id!==null){const base=tasks.find(t=>t.id===id);if(!base)return;editingDate ||= base.date;const task=occurrence(base,editingDate)||base;
         $('taskName').value=task.name;$('taskDate').value=task.date||'';$('taskTime').value=task.time||'';setSelect('taskDuration',task.duration);setSelect('taskIcon',task.icon || '');$('taskRepeat').value=base.repeat||'none';$('taskNotes').value=task.notes||'';
@@ -653,7 +677,7 @@ function saveGoalSchedule(goal, repeat, date, time, repeatDays=[], effective=nul
     }
 }
 function deleteCurrentGoal(){if(editingGoalId===null)return;remember();goals=goals.filter(g=>g.id!==editingGoalId);tasks.forEach(t=>{if(t.goalId===editingGoalId)delete t.goalId;});saveAll();closeGoalEditor();refreshEverything();notify('Goal deleted. Scheduled tasks retained.',true);}
-function openSettings() {$('visibleStart').value=settings.startHour;$('visibleEnd').value=settings.endHour;$('weekStart').value=settings.weekStart;$('themeChoice').value=settings.theme || 'forest';$('settingsError').textContent='';openModal('settingsModal');}
+function openSettings() {$('visibleStart').value=settings.startHour;$('visibleEnd').value=settings.endHour;$('weekStart').value=settings.weekStart;$('themeChoice').value=themeMeta[settings.theme]?settings.theme:'forest';updateThemePreview();$('settingsError').textContent='';openModal('settingsModal');}
 function exportBackup(){const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),tasks,goals,completedOccurrences,settings},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`my-day-${formatDate(new Date())}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Backup exported.');}
 function validateBackup(data){
     const colors=['purple','blue','green','orange','pink'],repeats=['none','daily','weekdays','weekly','monthly','custom'];
@@ -686,7 +710,7 @@ function validateBackup(data){
     }
     if(Object.entries(data.completedOccurrences).some(([key,value])=>!date(key.slice(key.lastIndexOf('_')+1))||typeof value!=='boolean'||!data.tasks.some(t=>String(t.id)===key.slice(0,key.lastIndexOf('_')))))throw Error('Invalid completion history.');
     if(!Number.isInteger(data.settings.startHour)||!Number.isInteger(data.settings.endHour)||data.settings.startHour<0||data.settings.endHour>24||data.settings.startHour>=data.settings.endHour||![0,1].includes(data.settings.weekStart))throw Error('Invalid settings.');
-    if(data.settings.theme !== undefined && !['forest','ocean'].includes(data.settings.theme))throw Error('Invalid theme.');
+    if(data.settings.theme !== undefined && !Object.hasOwn(themeMeta,data.settings.theme))throw Error('Invalid theme.');
     data.settings.theme ||= 'forest';
     return data;
 }
@@ -775,6 +799,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         saveGoalSchedule(goal,repeat,date,time,getWeekdays('goalWeekdays'),effective);
         saveAll();closeGoalEditor();refreshEverything();notify(repeat==='none'?'Goal saved.':'Goal saved with automatic sessions.',true);
     };
+    $('themeChoice').onchange=updateThemePreview;
     $('settingsForm').onsubmit=event=>{event.preventDefault();const start=Number($('visibleStart').value),end=Number($('visibleEnd').value);if(start>=end){$('settingsError').textContent='End hour must be later than start hour.';return;}settings={startHour:start,endHour:end,weekStart:Number($('weekStart').value),theme:$('themeChoice').value};saveAll();closeModal('settingsModal');refreshEverything();notify('Settings saved. Hours expand automatically to include your tasks.');};
     $('importFile').onchange=async event=>{const file=event.target.files[0];if(!file)return;try{if(file.size>10*1024*1024)throw Error('Choose a backup smaller than 10 MB.');const data=validateBackup(JSON.parse(await file.text()));remember();({tasks,goals,completedOccurrences,settings}=clone(data));saveAll();closeModal('settingsModal');refreshEverything();notify('Backup restored. You can undo this replacement.',true);}catch(error){$('settingsError').textContent=error.message;}finally{event.target.value='';}};
     document.querySelectorAll('.modal').forEach(modal=>{modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby',modal.id==='taskModal'?'modalTitle':modal.id==='goalModal'?'goalModalTitle':'settingsTitle');modal.addEventListener('click',event=>{if(event.target===modal){if(modal.id==='taskModal')closeTaskEditor();else if(modal.id==='goalModal')closeGoalEditor();else closeModal(modal.id);}});});

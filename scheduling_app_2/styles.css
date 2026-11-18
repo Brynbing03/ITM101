@@ -59,6 +59,19 @@
     --pink: var(--platinum);
 }
 
+/* Additional settings palettes. Each palette keeps the same semantic tokens so
+   existing task data and every screen update together. */
+:root[data-theme="sunset"] { --ink:#3B1F1F; --forest:#C44536; --jungle:#F28F3B; --jet:#704C4C; --porcelain:#FFF4E6; --background:#FFF8F0; --card:#FFFCF8; --sidebar:#FFF8F0; --text:var(--ink); --muted:#765D5D; --border:#E8CFC2; --soft:#FCE9D8; --purple:var(--forest); --blue:#D65A5A; --green:var(--jungle); --orange:#B86B25; --pink:#E07A5F; }
+:root[data-theme="lavender"] { --ink:#291B3D; --forest:#6C4AB6; --jungle:#B98BFF; --jet:#655A78; --porcelain:#F7F2FF; --background:#FBF9FF; --card:#FFFFFF; --sidebar:#F7F2FF; --text:var(--ink); --muted:#716783; --border:#DDD2F0; --soft:#F0E8FF; --purple:var(--forest); --blue:#6284E8; --green:#58A985; --orange:#C27C49; --pink:#D56C9A; }
+:root[data-theme="rose"] { --ink:#401D2A; --forest:#B8336A; --jungle:#E07A9A; --jet:#76515F; --porcelain:#FFF1F5; --background:#FFF8FA; --card:#FFFFFF; --sidebar:#FFF1F5; --text:var(--ink); --muted:#805F6B; --border:#F0CFDA; --soft:#FBE2EA; --purple:var(--forest); --blue:#607ACB; --green:#6DAA83; --orange:#D48749; --pink:#D65A8A; }
+:root[data-theme="mint"] { --ink:#12362D; --forest:#087F5B; --jungle:#52B788; --jet:#4E7166; --porcelain:#EDFFF7; --background:#F5FFFB; --card:#FFFFFF; --sidebar:#EDFFF7; --text:var(--ink); --muted:#55786D; --border:#C8E9DA; --soft:#DDF7EA; --purple:var(--forest); --blue:#4C86B8; --green:#52B788; --orange:#D98B3A; --pink:#D66B91; }
+:root[data-theme="teal"] { --ink:#12383A; --forest:#007C83; --jungle:#00A6A6; --jet:#4D7072; --porcelain:#ECFFFF; --background:#F4FFFF; --card:#FFFFFF; --sidebar:#ECFFFF; --text:var(--ink); --muted:#55787A; --border:#C9E8E8; --soft:#DDF6F6; --purple:var(--forest); --blue:#3578B6; --green:#42A879; --orange:#D17B3D; --pink:#D36C91; }
+:root[data-theme="slate"] { --ink:#1A2C38; --forest:#315872; --jungle:#6FA3C2; --jet:#58717D; --porcelain:#F1F7FA; --background:#F7FBFD; --card:#FFFFFF; --sidebar:#F1F7FA; --text:var(--ink); --muted:#607985; --border:#D0E0E7; --soft:#E5F0F5; --purple:var(--forest); --blue:#477DAB; --green:#4B9B83; --orange:#C77C40; --pink:#C86A8A; }
+:root[data-theme="amber"] { --ink:#3C2A12; --forest:#B45309; --jungle:#E9A23B; --jet:#766144; --porcelain:#FFF9E8; --background:#FFFCF2; --card:#FFFFFF; --sidebar:#FFF9E8; --text:var(--ink); --muted:#806F51; --border:#EBDCB5; --soft:#FFF0C9; --purple:var(--forest); --blue:#5E82B8; --green:#6EA276; --orange:#D67D29; --pink:#CF7185; }
+:root[data-theme="berry"] { --ink:#321D42; --forest:#7B2CBF; --jungle:#C77DFF; --jet:#6F547E; --porcelain:#FAF2FF; --background:#FDF9FF; --card:#FFFFFF; --sidebar:#FAF2FF; --text:var(--ink); --muted:#765F82; --border:#E3D0EF; --soft:#F1E0FF; --purple:var(--forest); --blue:#637DE0; --green:#5CA57A; --orange:#D18442; --pink:#D45D9B; }
+:root[data-theme="midnight"] { --ink:#E8EEF9; --forest:#536DFE; --jungle:#80CBC4; --jet:#A8B7D1; --porcelain:#101827; --background:#0B1220; --card:#18243A; --sidebar:#101827; --text:var(--ink); --muted:#A8B7D1; --border:#33435E; --soft:#22314B; --purple:var(--forest); --blue:#6EA8FE; --green:#5EEAD4; --orange:#FDBA74; --pink:#F9A8D4; }
+:root[data-theme="sand"] { --ink:#3D2924; --forest:#A44A3F; --jungle:#D98E62; --jet:#765B50; --porcelain:#FFF8ED; --background:#FFFCF6; --card:#FFFFFF; --sidebar:#FFF8ED; --text:var(--ink); --muted:#80695D; --border:#EAD9C5; --soft:#F8EBDD; --purple:var(--forest); --blue:#5B81A5; --green:#6E9A76; --orange:#D47C3E; --pink:#D37A8D; }
+
 body {
 
     font-family:
@@ -2018,6 +2031,23 @@ form textarea:focus {
     background: var(--pink);
 
 }
+
+.theme-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    margin: -4px 0 12px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--soft);
+    color: var(--text);
+}
+.theme-preview-label { font-size: 12px; font-weight: 700; }
+.theme-swatch-row { display: flex; gap: 6px; }
+.theme-swatch { width: 24px; height: 24px; border: 2px solid var(--card); border-radius: 50%; box-shadow: 0 0 0 1px var(--border); }
 
 
 /* =================================

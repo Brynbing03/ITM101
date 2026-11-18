@@ -1072,8 +1072,22 @@
             </section>
             <form id="settingsForm">
                 <label for="themeChoice">Color theme</label>
-                <select id="themeChoice"><option value="forest">Forest ? green &amp; porcelain</option><option value="ocean">Ocean ? blue &amp; pumpkin</option></select>
-                <p class="form-help">Choose a palette and save settings. Your theme is remembered in this browser.</p>
+                <select id="themeChoice">
+                    <option value="forest">Forest · green &amp; porcelain</option>
+                    <option value="ocean">Ocean · blue &amp; pumpkin</option>
+                    <option value="sunset">Sunset · coral &amp; apricot</option>
+                    <option value="lavender">Lavender · violet &amp; lilac</option>
+                    <option value="rose">Rose · berry &amp; blush</option>
+                    <option value="mint">Mint · emerald &amp; seafoam</option>
+                    <option value="teal">Teal · teal &amp; aqua</option>
+                    <option value="slate">Slate · navy &amp; ice</option>
+                    <option value="amber">Amber · gold &amp; cream</option>
+                    <option value="berry">Berry · plum &amp; raspberry</option>
+                    <option value="midnight">Midnight · indigo &amp; blue</option>
+                    <option value="sand">Sand · terracotta &amp; oat</option>
+                </select>
+                <div id="themePreview" class="theme-preview" aria-live="polite"></div>
+                <p class="form-help">Choose from 12 color themes. Your theme is remembered in this browser.</p>
                 <div class="form-row">
                     <div><label for="visibleStart">Day begins</label><select id="visibleStart"></select></div>
                     <div><label for="visibleEnd">Day ends</label><select id="visibleEnd"></select></div>
