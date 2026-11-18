@@ -1,6 +1,4 @@
 node_modules/
 .npm-cache/
-.netlify/
 .env
 .env.*
-!.env.example

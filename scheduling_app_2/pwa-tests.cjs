@@ -14,23 +14,38 @@ for (const icon of manifest.icons) {
     assert.equal(`${file.readUInt32BE(16)}x${file.readUInt32BE(20)}`,icon.sizes);
 }
 console.log('PASS Manifest and icon dimensions');
-let signedIn = true;
-const server=http.createServer((req,res)=>{
-    if (new URL(req.url,'http://localhost').pathname === '/.netlify/functions/auth') {
-        if (req.method === 'POST') signedIn = false;
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Cache-Control', 'no-store');
-        res.end(JSON.stringify({user: signedIn ? {name:'Test User',email:'test@example.com'} : null}));
-        return;
+const firebaseAuthStub = `
+    export const getAuth = () => ({});
+    export class GoogleAuthProvider {}
+    let listener;
+    export function onAuthStateChanged(auth, callback) {
+        listener = callback;
+        listener(null);
     }
+    export async function signInWithPopup() {
+        listener({displayName: 'Test User', email: 'test@example.com'});
+    }
+    export async function signOut() { listener(null); }
+`;
+const server=http.createServer((req,res)=>{
     // Exercise hosting from a subdirectory as well as scoped offline caches.
     const relative=new URL(req.url,'http://localhost').pathname.replace(/^\/my-day\//,'');
+    if (relative === 'firebase-auth.stub.js' || relative === 'firebase-app.stub.js') {
+        res.setHeader('Content-Type', 'text/javascript');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(relative === 'firebase-auth.stub.js' ? firebaseAuthStub : 'export const initializeApp = () => ({});');
+        return;
+    }
     if(relative.includes('..')||relative.startsWith('/')){res.writeHead(404).end();return;}
     const file=path.join(__dirname,relative||'index.html');
     try {
         const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.png':'image/png'};
         res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');
-        res.setHeader('Cache-Control','no-store');res.end(fs.readFileSync(file));
+        res.setHeader('Cache-Control','no-store');
+        const content = fs.readFileSync(file);
+        res.end(['auth.js', 'firebase-config.js'].includes(relative)
+            ? content.toString().replace(/https:\/\/www\.gstatic\.com\/firebasejs\/[^/]+\/firebase-(app|auth)\.js/g, './firebase-$1.stub.js')
+            : content);
     }catch{res.writeHead(404).end();}
 });
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -80,14 +95,15 @@ let browser,ws;
     assert.equal(await evaluate("navigator.serviceWorker.controller.scriptURL.endsWith('/my-day/sw.js')"),true);
     assert.equal(await evaluate("(await caches.keys()).some(key=>key.startsWith('my-day:/my-day/:'))"),true);
     console.log('PASS Service worker installation and subdirectory scope');
+    await until("!document.getElementById('googleLogin').hidden");
+    await evaluate("document.getElementById('googleLogin').click()");
     await until("document.getElementById('accountStatus').textContent.includes('test@example.com')");
     assert.equal(await evaluate("document.getElementById('googleLogin').hidden"),true);
     assert.equal(await evaluate("document.getElementById('googleLogout').hidden"),false);
     await evaluate("document.getElementById('googleLogout').click()");
     await until("!document.getElementById('googleLogin').hidden");
-    assert.equal(signedIn,false);
     assert.equal(await evaluate("document.getElementById('googleLogout').hidden"),true);
-    console.log('PASS Account UI shows the signed-in profile and signs out through the server');
+    console.log('PASS Account UI signs in and out using the Firebase SDK stub');
     await evaluate("tasks=[{id:'offline-test',name:'Offline test',date:formatDate(new Date()),time:'09:00',duration:60,icon:'⭐',color:'purple',notes:'',repeat:'none',inbox:false}]; settings.theme='ocean'; saveAll(); refreshEverything();");
     await command('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
     await command('Page.reload',{ignoreCache:true});
@@ -104,8 +120,8 @@ let browser,ws;
     assert.equal(await evaluate("(await fetch('./icons/icon-192.png')).ok"),true);
     assert.equal(await evaluate("(await (await fetch('./manifest.webmanifest')).json()).name"),'My Day');
     console.log('PASS App icons and manifest available offline');
-    assert.equal(await evaluate("document.getElementById('accountStatus').textContent.includes('Connect to the internet')"),true);
-    assert.equal(await evaluate("await fetch('/.netlify/functions/auth?action=login').then(()=>false,()=>true)"),true);
+    await until("document.getElementById('accountStatus').textContent.includes('Connect to the internet')");
+    assert.equal(await evaluate("document.getElementById('googleLogin').hidden && document.getElementById('googleLogout').hidden"),true);
     console.log('PASS Offline authentication stays unavailable instead of serving a cached app page');
     // Cross-app caches on the same origin must survive our worker cleanup.
     await evaluate("await caches.open('other-app-cache');await caches.open('my-day:/my-day/:old');const key=(await caches.keys()).find(key=>key.startsWith('my-day:/my-day/:v'));const cache=await caches.open(key);if(!await cache.match(new URL('./index.html',location.href)))throw Error('Missing shell');if(!await cache.match(new URL('./auth.js',location.href)))throw Error('Missing account UI');");
