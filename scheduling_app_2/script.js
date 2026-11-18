@@ -537,11 +537,20 @@ const themeMeta={
     amber:{label:'Amber',colors:['#B45309','#E9A23B','#FFF9E8']},berry:{label:'Berry',colors:['#7B2CBF','#C77DFF','#FAF2FF']},
     midnight:{label:'Midnight',colors:['#536DFE','#80CBC4','#101827']},sand:{label:'Sand',colors:['#A44A3F','#D98E62','#FFF8ED']}
 };
+function updateFavicon(theme) {
+    const favicon=document.querySelector('#favicon');
+    if(!favicon)return;
+    const [primary,secondary,surface]=themeMeta[theme].colors;
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="16" fill="${primary}"/><path d="m18 33 9 9 19-21" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="51" cy="13" r="6" fill="${secondary}" stroke="${surface}" stroke-width="2"/></svg>`;
+    favicon.type='image/svg+xml';
+    favicon.href=`data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
 function applyTheme() {
     const theme=themeMeta[settings.theme]?settings.theme:'forest';
     settings.theme=theme;
     document.documentElement.dataset.theme=theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content',themeMeta[theme].colors[0]);
+    updateFavicon(theme);
 }
 function updateThemePreview() {
     const theme=themeMeta[$('themeChoice')?.value]||themeMeta.forest;
